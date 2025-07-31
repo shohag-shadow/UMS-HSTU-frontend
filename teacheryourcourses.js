@@ -4,13 +4,14 @@ function teacherYourCources()
         if(courses)
         {
             console.log(courses);
-             const main = document.getElementById("mainContent");
+            const main = document.getElementById("mainContent");
             main.innerHTML = "";
             courses.forEach(course => {
                 appendToMain(
                     createBodyCard({
                         icon:course.course["code"],
-                        title:course.course["title"]
+                        title:course.course["title"],
+                        onClick:()=>showteacherCourseInfo(`${path}/${course["id"]}`),
                     })
                 );
             });

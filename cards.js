@@ -46,7 +46,6 @@ function createSidePanelCard({ title, icon = "📁", onClick = null }) {
 
 function createBodyCard({ icon="🗃️", title="title", subtitle=null, onClick=null }) {
     const card = document.createElement("div");
-
     card.style = `
         width: 30vh;
         height: 30vh;
