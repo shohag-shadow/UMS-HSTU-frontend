@@ -116,3 +116,53 @@ async function postWithAuth(url, bodyObject, targetMainContentOnly = false) {
     }
 }
 
+async function updateWithAuth(url, bodyObject, usePatch = false, targetMainContentOnly = false) {
+    showLoadingOverlay(targetMainContentOnly);
+
+    try {
+        const isFormData = bodyObject instanceof FormData;
+
+        let method = usePatch ? "PATCH" : "PUT";
+
+        // If FormData, send actual HTTP method as POST, add _method override
+        if (isFormData) {
+            method = "POST";
+            if (!bodyObject.has("_method")) {
+                bodyObject.append("_method", usePatch ? "PATCH" : "PUT");
+            }
+        }
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                "Authorization": `Bearer ${getCookie("TOKEN")}`,
+                "Accept": "application/json",
+                // Do NOT set Content-Type if FormData, browser handles it
+                ...(isFormData ? {} : { "Content-Type": "application/json" })
+            },
+            body: isFormData ? bodyObject : JSON.stringify(bodyObject)
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                deleteCookie("TOKEN");
+                location.reload();
+            }
+            const errorData = await response.json();
+
+            if (errorData.errors) {
+                const messages = Object.values(errorData.errors).flat().join('\n');
+                throw new Error(messages);
+            }
+
+            throw new Error(errorData.message || "Request failed");
+        }
+
+        return await response.json();
+    } catch (error) {
+        showError(error.message || "An unknown error occurred.");
+        return null;
+    } finally {
+        hideLoadingOverlay();
+    }
+}

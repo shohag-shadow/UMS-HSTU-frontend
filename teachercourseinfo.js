@@ -16,8 +16,15 @@ function showteacherCourseInfo()
         subtitle:"See information about assignments",
         onClick:showTeacherCoursesAssignmentList
     });
+    let materialCard=createBodyCard({
+        icon:"📚",
+        title:"Materials",
+        subtitle:"See and add materials for this course",
+        onClick:showTeacherCourseMaterialsPage
+    });
     const main = document.getElementById("mainContent");
     main.innerHTML = "";
     appendToMain(studentsCard);
     appendToMain(assignmentCard);
+    appendToMain(materialCard);
 }

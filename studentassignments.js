@@ -67,7 +67,7 @@ function showStudentCoursesAssignmentList() {
 
             tr.addEventListener("click", () => {
                 path = `${path}/${assignment.assignment.id}/studentassignments/${assignment.id}`;
-                viewStudentAssignmentDetails();
+                viewStudentAssignmentDetails(assignment.id);
                 // viewAssignmentDetails(); // Uncomment when ready
             });
 

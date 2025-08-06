@@ -14,14 +14,11 @@ function appendToSidePanel(html) {
     document.getElementById("sidePanel").appendChild(html);
 }
 
-function viewStudentAssignmentDetails() {
+function viewStudentAssignmentDetails(studentassignmentid) {
     fetchWithAuth(`${api}/${path}`)
         .then(assignment => {
             if (!assignment) return;
             console.log(assignment);
-
-            const user = JSON.parse(localStorage.getItem("authUser"));
-            const studentId = user?.id;
 
             const container = document.createElement("div");
             container.style = `
@@ -35,19 +32,26 @@ function viewStudentAssignmentDetails() {
 
             // Title
             const titleEl = document.createElement("h2");
-            titleEl.textContent = `Title: ${assignment.title}`;
+            titleEl.textContent = `Title: ${assignment.assignment.title}`;
             titleEl.style = "margin-bottom: 10px;";
             container.appendChild(titleEl);
+
             // Description
             const descEl = document.createElement("p");
-            descEl.innerHTML = `<strong>Description:</strong> ${assignment.description || "No description provided."}`;
-            descEl.style = "margin-bottom: 20px;";
+            descEl.innerHTML = `<strong>Description:</strong> ${assignment.assignment.description || "No description provided."}`;
+            descEl.style = "margin-bottom: 10px;";
             container.appendChild(descEl);
 
-            // Download button if file exists
-            if (assignment.file_path) {
+            // Deadline
+            const deadlineEl = document.createElement("p");
+            deadlineEl.innerHTML = `<strong>Deadline:</strong> ${assignment.assignment.deadline || "No deadline set."}`;
+            deadlineEl.style = "margin-bottom: 20px;";
+            container.appendChild(deadlineEl);
+
+            // Download attached file
+            if (assignment.assignment.file_path) {
                 const fileBtn = document.createElement("a");
-                fileBtn.href = `${fileapi}/storage/${assignment.file_path}`;
+                fileBtn.href = `${fileapi}/storage/${assignment.assignment.file_path}`;
                 fileBtn.target = "_blank";
                 fileBtn.textContent = "📥 Download Attached File";
                 fileBtn.style = `
@@ -67,7 +71,7 @@ function viewStudentAssignmentDetails() {
             }
 
             // Check submission
-            const submission = assignment.student_assignments?.find(s => s.student_id === studentId);
+            const submission = assignment.submitted;
 
             if (submission) {
                 const submittedMsg = document.createElement("p");
@@ -75,14 +79,19 @@ function viewStudentAssignmentDetails() {
                 submittedMsg.style = "margin-top: 30px; color: lightgreen; font-weight: bold;";
                 container.appendChild(submittedMsg);
             } else {
-                // Show form
+                const submittedMsg = document.createElement("p");
+                submittedMsg.textContent = "❌ You have not submitted this assignment.";
+                submittedMsg.style = "margin-top: 30px; color: red; font-weight: bold;";
+                container.appendChild(submittedMsg);
+
+                // Create form
                 const form = document.createElement("form");
                 form.style = "margin-top: 30px;";
                 form.enctype = "multipart/form-data";
 
                 const fileInput = document.createElement("input");
                 fileInput.type = "file";
-                fileInput.accept = ".pdf,.doc,.docx,.zip,.rar,.txt"; // adjust types if needed
+                fileInput.accept = ".pdf,.doc,.docx,.zip,.rar,.txt";
                 fileInput.required = true;
                 fileInput.style = "margin-bottom: 10px; display: block;";
                 form.appendChild(fileInput);
@@ -101,26 +110,26 @@ function viewStudentAssignmentDetails() {
                 `;
                 submitBtn.onmouseover = () => submitBtn.style.backgroundColor = "#0069d9";
                 submitBtn.onmouseout = () => submitBtn.style.backgroundColor = "#007bff";
-
                 form.appendChild(submitBtn);
 
-                form.addEventListener("submit", async (e) => {
+                form.addEventListener("submit", (e) => {
                     e.preventDefault();
                     const file = fileInput.files[0];
-                    if (!file) return;
+                    
+                    if (!file) return alert("Please select a file.");
 
                     const formData = new FormData();
                     formData.append("file", file);
+                    formData.append("_method", "PUT");
 
-                    const res = await fetchWithAuth(`${api}/student/submit/${assignment.id}`, false, {
-                        method: "POST",
-                        body: formData
-                    });
-
-                    if (res) {
-                        alert("✅ Assignment submitted successfully!");
-                        viewStudentAssignmentDetails(); // refresh view
-                    }
+                    updateWithAuth(`${api}/${path}`, formData)
+                        .then(res => {
+                            if (res) {
+                                alert("✅ Assignment submitted successfully!");
+                                viewStudentAssignmentDetails(studentassignmentid); // 🔄 refresh view
+                            }
+                        })
+                    
                 });
 
                 container.appendChild(form);

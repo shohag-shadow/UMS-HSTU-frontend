@@ -83,7 +83,7 @@ function createAssignmentForm() {
     // Submit button
     const submitBtn = document.createElement("button");
     submitBtn.type = "submit";
-    submitBtn.textContent = "Submit Assignment";
+    submitBtn.textContent = "Create Assignment";
     submitBtn.style = `
         background-color: #007bff;
         color: white;

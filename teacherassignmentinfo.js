@@ -40,6 +40,11 @@ function viewAssignmentDetails() {
             descEl.innerHTML = `<strong>Description:</strong> ${assignment.description || "No description provided."}`;
             descEl.style = "margin-bottom: 20px;";
             container.appendChild(descEl);
+            // Deadline
+            const deadlineEl = document.createElement("p");
+            deadlineEl.innerHTML = `<strong>Deadline:</strong> ${assignment.deadline || "No deadline set."}`;
+            deadlineEl.style = "margin-bottom: 20px;";
+            container.appendChild(deadlineEl);
 
             // Download button if file exists
             if (assignment.file_path) {
@@ -84,8 +89,8 @@ function viewAssignmentDetails() {
                 assignment.studentassignments.forEach(sub => {
                     const tr = document.createElement("tr");
 
-                    const downloadBtn = sub.file_url
-                        ? `<a href="${sub.file_url}" target="_blank" style="
+                    const downloadBtn = sub.file_path
+                        ? `<a href="${fileapi}/storage/${sub.file_path}" target="_blank" style="
                             display: inline-block;
                             padding: 6px 12px;
                             background-color: #007BFF;
