@@ -1,4 +1,5 @@
 const api = "http://127.0.0.1:8000/api";
+const fileapi="http://127.0.0.1:8000"
 let path = "";
 let currentActivePanel = null;
 
@@ -30,6 +31,8 @@ function whichToload(id, p) {
     if (id === 7) return createSessionForm;
     if (id === 8) return teacherYourCources;
     if (id === 9) return createTeacherCourseForm;
+    if (id === 10) return studentYourCources;
+
     if (id === 99) return myAccount;
     return null;
 }

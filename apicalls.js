@@ -84,31 +84,35 @@ async function fetchWithAuth(url, targetMainContentOnly = false) {
 
 async function postWithAuth(url, bodyObject, targetMainContentOnly = false) {
     showLoadingOverlay(targetMainContentOnly);
+
     try {
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${getCookie("TOKEN")}`,
-                    "Accept": "application/json",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(bodyObject)
-            });
-            if (!response.ok) {
-                if (response.status === 401) {
-                    deleteCookie("TOKEN");
-                    location.reload();
-                }
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Request failed");
+        const isFormData = bodyObject instanceof FormData;
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${getCookie("TOKEN")}`,
+                "Accept": "application/json",
+                ...(isFormData ? {} : { "Content-Type": "application/json" }) // Do NOT set Content-Type for FormData
+            },
+            body: isFormData ? bodyObject : JSON.stringify(bodyObject)
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                deleteCookie("TOKEN");
+                location.reload();
             }
-            return await response.json();
-        } catch (error) {
-            showError(error.message || "An unknown error occurred.");
-            return null;
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Request failed");
         }
+
+        return await response.json();
+    } catch (error) {
+        showError(error.message || "An unknown error occurred.");
+        return null;
     } finally {
         hideLoadingOverlay();
     }
 }
+

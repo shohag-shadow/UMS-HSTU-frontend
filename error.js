@@ -24,7 +24,7 @@ function showError(message) {
     overlay.style.opacity = "1";
     overlay.style.zIndex = "9999";
     overlay.style.transition = "opacity 0.5s ease";
-
+    overlay.style.maxWidth="100%";
     document.body.appendChild(overlay);
 
     setTimeout(() => {
